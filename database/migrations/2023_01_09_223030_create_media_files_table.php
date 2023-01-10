@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('type');
+            $table->unsignedBigInteger('id_user');
             $table->foreign('id_user')->references('id')->on('users');
-            $table->date('created_at');
             $table->timestamps();
         });
     }

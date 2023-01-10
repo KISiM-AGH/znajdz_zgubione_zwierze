@@ -17,8 +17,10 @@ return new class extends Migration
             $table->id();
             $table->string('content');
             $table->boolean('is_ban');
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_post');
             $table->foreign('id_user')->references('id')->on('users');
-            $table->foreign('id_post')->references('id')->on('posts');
+            $table->foreign('id_post')->references('id')->on('posts')->onDelete('cascade');
             $table->timestamps();
         });
     }

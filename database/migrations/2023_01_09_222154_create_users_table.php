@@ -13,12 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('type_announcements', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('localization');
-            $table->string('description');
-            $table->date('created_at');
+            $table->string('email')->unique();
+            $table->string('location');
+            $table->unsignedBigInteger('id_role');
+            //$table->foreign('id_role')->references('id')->on('roles');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
             $table->timestamps();
         });
     }
@@ -30,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('type_announcements');
+        Schema::dropIfExists('users');
     }
 };

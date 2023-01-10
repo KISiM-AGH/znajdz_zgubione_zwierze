@@ -18,12 +18,14 @@ return new class extends Migration
             $table->string('title');
             $table->string('localization');
             $table->string('description');
+            $table->unsignedBigInteger('id_mediafile');
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_coordinate');
+            $table->unsignedBigInteger('id_type_announcement');
             $table->foreign('id_mediafile')->references('id')->on('media_files');
             $table->foreign('id_user')->references('id')->on('users');
-            $table->foreign('id_coordinate')->references('id')->on('coordinates');
+            $table->foreign('id_coordinate')->references('id')->on('coordinates')->onDelete('cascade');
             $table->foreign('id_type_announcement')->references('id')->on('type_announcements');
-            $table->date('created_at');
-            $table->date('modified_at');
             $table->timestamps();
         });
     }

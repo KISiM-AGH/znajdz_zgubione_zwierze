@@ -19,9 +19,10 @@ return new class extends Migration
             $table->string('description');
             $table->string('body');
             $table->boolean('is_ban');
-            $table->date('created_at');
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_media');
             $table->foreign('id_user')->references('id')->on('users');
-            $table->foreign('id_media')->references('media_files');
+            $table->foreign('id_media')->references('id')->on('media_files');
             $table->timestamps();
         });
     }
