@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Chat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ChatFactory extends Factory
 {
+    //private $faker = Faker\Factory::create('pl_PL');
+    protected $model = Chat::class;
     /**
      * Define the model's default state.
      *

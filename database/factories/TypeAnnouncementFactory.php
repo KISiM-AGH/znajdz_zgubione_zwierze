@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\TypeAnnouncement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TypeAnnouncementFactory extends Factory
 {
+    //private $faker = Faker\Factory::create('pl_PL');
+    protected $model = TypeAnnouncement::class;
     /**
      * Define the model's default state.
      *
@@ -16,8 +19,11 @@ class TypeAnnouncementFactory extends Factory
      */
     public function definition()
     {
+        //$type = round(rand(0, 1));
+        $name = fake()->randomElement(['finding', 'disappearance']);
+        //unnecessary
         return [
-            //
+            'name' => $name
         ];
     }
 }

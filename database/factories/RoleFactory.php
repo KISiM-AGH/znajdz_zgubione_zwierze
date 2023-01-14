@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class RoleFactory extends Factory
 {
+    //private $faker = Faker\Factory::create('pl_PL');
+    protected $model = Role::class;
     /**
      * Define the model's default state.
      *
@@ -17,7 +20,8 @@ class RoleFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'name' => fake()->name,
+            'description' => fake()->text(200)
         ];
     }
 }

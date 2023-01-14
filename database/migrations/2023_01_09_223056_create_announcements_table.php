@@ -17,12 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('localization');
-            $table->string('description');
-            $table->unsignedBigInteger('id_mediafile');
+            $table->longText('description');
+            $table->unsignedBigInteger('id_media_file');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_coordinate');
             $table->unsignedBigInteger('id_type_announcement');
-            $table->foreign('id_mediafile')->references('id')->on('media_files');
+            $table->foreign('id_media_file')->references('id')->on('media_files');
             $table->foreign('id_user')->references('id')->on('users');
             $table->foreign('id_coordinate')->references('id')->on('coordinates')->onDelete('cascade');
             $table->foreign('id_type_announcement')->references('id')->on('type_announcements');

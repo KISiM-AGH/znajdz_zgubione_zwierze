@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AnnouncementSeeder extends Seeder
-{
+{ 
     /**
      * Run the database seeds.
      *
@@ -14,6 +14,9 @@ class AnnouncementSeeder extends Seeder
      */
     public function run()
     {
-        //
+        // Announcement::factory()
+        //     ->count(300)
+        //     ->hasCommentAnnouncements(5)
+        //     ->create();
     }
 }

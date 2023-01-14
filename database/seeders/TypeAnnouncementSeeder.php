@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 
 class TypeAnnouncementSeeder extends Seeder
@@ -14,6 +15,12 @@ class TypeAnnouncementSeeder extends Seeder
      */
     public function run()
     {
-        //
+        DB::table('type_announcements')->insert([
+            'name' => 'search'
+        ]);
+
+        DB::table('type_announcements')->insert([
+            'name' => 'seeking'
+        ]);
     }
 }

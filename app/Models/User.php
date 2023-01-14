@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id',
+        'id_role',
         'location'
     ];
 
@@ -43,4 +43,44 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'id', 'id_role');
+    }
+
+    public function announcements()
+    {
+        return $this->hasMany(Announcement::class, 'id_user', 'id');
+    }
+
+    public function commentAnnouncements()
+    {
+        return $this->hasMany(CommentAnnouncement::class, 'id_user', 'id');
+    }
+
+    public function commentPosts()
+    {
+        return $this->hasMany(CommentPost::class, 'id_user', 'id');
+    }
+
+    public function mediaFiles()
+    {
+        return $this->hasMany(MediaFile::class, 'id_user', 'id');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'id_user', 'id');
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'id_user', 'id');
+    }
+
+    public function userChats()
+    {
+        return $this->hasMany(UserChat::class, 'id_user', 'id');
+    }
 }

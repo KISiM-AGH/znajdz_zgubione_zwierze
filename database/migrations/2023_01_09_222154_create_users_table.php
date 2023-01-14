@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('location');
             $table->unsignedBigInteger('id_role');
-            //$table->foreign('id_role')->references('id')->on('roles');
+            $table->foreign('id_role')->references('id')->on('roles');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
