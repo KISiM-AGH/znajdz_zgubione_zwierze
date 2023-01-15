@@ -20,7 +20,7 @@ class ChatFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'name' => fake()->sentence(4)
         ];
     }
 }

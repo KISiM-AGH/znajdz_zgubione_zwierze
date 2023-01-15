@@ -9,6 +9,16 @@ class Coordinate extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'latitude',
+        'longitude'
+    ];
+
     public function announcement()
     {
         return $this->belongsTo(Announcement::class, 'id_coordinate', 'id');

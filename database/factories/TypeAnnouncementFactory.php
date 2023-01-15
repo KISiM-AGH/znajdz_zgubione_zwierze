@@ -20,7 +20,7 @@ class TypeAnnouncementFactory extends Factory
     public function definition()
     {
         //$type = round(rand(0, 1));
-        $name = fake()->randomElement(['finding', 'disappearance']);
+        $name = fake()->randomElement(['seeker', 'finder']);
         //unnecessary
         return [
             'name' => $name

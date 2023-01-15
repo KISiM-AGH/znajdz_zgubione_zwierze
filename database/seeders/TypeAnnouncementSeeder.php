@@ -16,11 +16,11 @@ class TypeAnnouncementSeeder extends Seeder
     public function run()
     {
         DB::table('type_announcements')->insert([
-            'name' => 'search'
+            'name' => 'finder'
         ]);
 
         DB::table('type_announcements')->insert([
-            'name' => 'seeking'
+            'name' => 'seeker'
         ]);
     }
 }

@@ -26,7 +26,7 @@ class AnnouncementFactory extends Factory
     {
         return [
             'title' => fake()->sentence(7),
-            'localization' => fake()->address(),
+            'localization' => fake()->city(),
             'description' => fake()->text(),
             'id_media_file' => MediaFile::factory()->create()->id,
             //'id_user' => factory(User::class)->create()->id,

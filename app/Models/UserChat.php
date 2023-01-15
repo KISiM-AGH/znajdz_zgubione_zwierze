@@ -9,6 +9,16 @@ class UserChat extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'id_user',
+        'id_chat'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id', 'id_user');
