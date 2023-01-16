@@ -6,7 +6,7 @@ use App\Http\Resources\V1\AnnouncementResource;
 use App\Http\Resources\V1\AnnouncementCollection;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreAnnouncementRequest;
-use App\Http\Requests\UpdateAnnouncementRequest;
+use App\Http\Requests\V1\UpdateAnnouncementRequest;
 use App\Models\Announcement;
 use App\Filters\V1\AnnouncementFilter;
 
@@ -105,6 +105,7 @@ class AnnouncementController extends Controller
     public function update(UpdateAnnouncementRequest $request, Announcement $announcement)
     {
         //
+        $announcement->update($request->all());
     }
 
     /**

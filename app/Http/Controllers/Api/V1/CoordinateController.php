@@ -8,7 +8,7 @@ use App\Http\Resources\V1\CoordinateResource;
 use App\Http\Resources\V1\CoordinateCollection;
 
 use App\Http\Requests\V1\StoreCoordinateRequest;
-use App\Http\Requests\UpdateCoordinateRequest;
+use App\Http\Requests\V1\UpdateCoordinateRequest;
 use App\Models\Coordinate;
 
 class CoordinateController extends Controller
@@ -80,6 +80,8 @@ class CoordinateController extends Controller
     public function update(/*Request $request*/ UpdateCoordinateRequest $request, $id)
     {
         //
+        $coordinate = Coordinate::find($id);
+        $coordinate->update($request->all());
     }
 
     /**

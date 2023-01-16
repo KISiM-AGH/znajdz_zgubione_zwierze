@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreMessageRequest;
-use App\Http\Requests\UpdateMessageRequest;
+use App\Http\Requests\V1\UpdateMessageRequest;
 use App\Models\Message;
 use App\Http\Resources\V1\MessageResource;
 use App\Http\Resources\V1\MessageCollection;
@@ -94,6 +94,8 @@ class MessageController extends Controller
     public function update(/*Request $request*/ UpdateMessageRequest $request, $id)
     {
         //
+        $message = Message::find($id);
+        $message->update($request->all());
     }
 
     /**

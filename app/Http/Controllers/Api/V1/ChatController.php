@@ -7,7 +7,7 @@ use App\Http\Resources\V1\ChatResource;
 use App\Http\Resources\V1\ChatCollection;
 
 use App\Http\Requests\V1\StoreChatRequest;
-use App\Http\Requests\UpdateChatRequest;
+use App\Http\Requests\V1\UpdateChatRequest;
 use App\Models\Chat;
 use App\Filters\V1\ChatFilter;
 
@@ -104,7 +104,8 @@ class ChatController extends Controller
      */
     public function update(UpdateChatRequest $request, Chat $chat)
     {
-        //
+        // 
+        $chat->update($request->all());
     }
 
     /**

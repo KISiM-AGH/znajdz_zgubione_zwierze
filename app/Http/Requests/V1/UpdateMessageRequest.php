@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -13,7 +13,7 @@ class UpdateMessageRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,17 @@ class UpdateMessageRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'content' => 'required|string',
+            'chatId' => 'required|numeric',
+            'userId' => 'required|numeric'
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'id_user' => $this->userId,
+            'id_chat' => $this->chatId
+        ]);
     }
 }

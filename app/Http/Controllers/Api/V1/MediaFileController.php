@@ -8,7 +8,7 @@ use App\Http\Resources\V1\MediaFileResource;
 use App\Http\Resources\V1\MediaFileCollection;
 
 use App\Http\Requests\V1\StoreMediaFileRequest;
-use App\Http\Requests\UpdateMediaFileRequest;
+use App\Http\Requests\V1\UpdateMediaFileRequest;
 use App\Models\MediaFile;
 use App\Filters\V1\MediaFileFilter;
 
@@ -95,6 +95,8 @@ class MediaFileController extends Controller
     public function update(/*Request $request*/ UpdateMediaFileRequest $request, $id)
     {
         //
+        $mediaFile = MediaFile::find($id);
+        $mediaFile->update($request->all());
     }
 
     /**

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRoleRequest extends FormRequest
+class UpdateUserChatRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class UpdateRoleRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,16 @@ class UpdateRoleRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'userId' => 'required|numeric',
+            'chatId' => 'required|numeric'
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'id_user' => $this->userId,
+            'id_chat' => $this->chatId
+        ]);
     }
 }

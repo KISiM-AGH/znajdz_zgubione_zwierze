@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\V1\UpdateUserRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
 use App\Filters\V1\UserFilter;
@@ -94,6 +94,8 @@ class UserController extends Controller
     public function update(/*Request $request*/ UpdateUserRequest $request, User $user)
     {
         //
+        //$user = User::find($id);
+        $user->update($request->all());
     }
 
     /**

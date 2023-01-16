@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreTypeAnnouncementRequest;
-use App\Http\Requests\UpdateTypeAnnouncementRequest;
+use App\Http\Requests\V1\UpdateTypeAnnouncementRequest;
 use App\Models\TypeAnnouncement;
 use App\Models\Role;
 use App\Http\Resources\V1\TypeAnnouncementResource;
@@ -80,6 +80,8 @@ class TypeAnnouncementController extends Controller
     public function update(/*Request $request*/ UpdateTypeAnnouncementRequest $request, $id)
     {
         //
+        $typeAnnouncement = TypeAnnouncement::find($id);
+        $typeAnnouncement->update($request->all());
     }
 
     /**

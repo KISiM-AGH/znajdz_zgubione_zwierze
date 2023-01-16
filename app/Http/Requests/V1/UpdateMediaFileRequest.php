@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateChatRequest extends FormRequest
+class UpdateMediaFileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class UpdateChatRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,17 @@ class UpdateChatRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+        'name' => 'required|string',
+        'type' => 'required|string',
+        'url' => 'required|url',
+        'userId' => 'required|numeric'
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'id_user' => $this->userId
+        ]);
     }
 }

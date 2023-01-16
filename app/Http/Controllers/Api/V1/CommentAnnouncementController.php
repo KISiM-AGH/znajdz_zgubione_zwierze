@@ -8,7 +8,7 @@ use App\Http\Resources\V1\CommentAnnouncementResource;
 use App\Http\Resources\V1\CommentAnnouncementCollection;
 
 use App\Http\Requests\V1\StoreCommentAnnouncementRequest;
-use App\Http\Requests\UpdateCommentAnnouncementRequest;
+use App\Http\Requests\V1\UpdateCommentAnnouncementRequest;
 use App\Models\CommentAnnouncement;
 
 class CommentAnnouncementController extends Controller
@@ -80,6 +80,8 @@ class CommentAnnouncementController extends Controller
     public function update(/*Request $request*/ UpdateCommentAnnouncementRequest $request, $id)
     {
         //
+        $commentAnnouncement = CommentAnnouncement::find($id);
+        $commentAnnouncement->update($request->all());
     }
 
     /**

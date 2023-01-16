@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreRoleRequest;
-use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Requests\V1\UpdateRoleRequest;
 use App\Models\Role;
 use App\Http\Resources\V1\RoleResource;
 use App\Http\Resources\V1\RoleCollection;
@@ -94,6 +94,8 @@ class RoleController extends Controller
     public function update(/*Request $request*/ UpdateRoleRequest $request, $id)
     {
         //
+        $role = Role::find($id);
+        $role->update($request->all());
     }
 
     /**

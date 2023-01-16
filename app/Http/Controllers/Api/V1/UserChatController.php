@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreUserChatRequest;
-use App\Http\Requests\UpdateUserChatRequest;
+use App\Http\Requests\V1\UpdateUserChatRequest;
 use App\Models\UserChat;
 use App\Http\Resources\V1\UserChatResource;
 use App\Http\Resources\V1\UserChatCollection;
@@ -78,6 +78,8 @@ class UserChatController extends Controller
     public function update(/*Request $request*/ UpdateUserChatRequest $request, $id)
     {
         //
+        $userChat = UserChat::find($id);
+        $userChat->update($request->all());
     }
 
     /**

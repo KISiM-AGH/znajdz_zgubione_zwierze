@@ -7,7 +7,7 @@ use App\Http\Resources\V1\CommentPostCollection;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreCommentPostRequest;
-use App\Http\Requests\UpdateCommentPostRequest;
+use App\Http\Requests\V1\UpdateCommentPostRequest;
 use App\Models\CommentPost;
 
 class CommentPostController extends Controller
@@ -76,9 +76,11 @@ class CommentPostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(/*Request $request, $id*/ UpdateCommentPostRequest $request, CommentPost $commentPost)
+    public function update(/*Request $request, $id*/ UpdateCommentPostRequest $request, $id/*CommentPost $commentPost*/)
     {
         //
+        $commentPost = CommentPost::find($id);
+        $commentPost->update($request->all());
     }
 
     /**
