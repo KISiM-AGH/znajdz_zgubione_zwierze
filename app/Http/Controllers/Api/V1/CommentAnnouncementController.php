@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\CommentAnnouncementResource;
 use App\Http\Resources\V1\CommentAnnouncementCollection;
@@ -93,5 +94,6 @@ class CommentAnnouncementController extends Controller
     public function destroy($id)
     {
         //
+        CommentAnnouncement::find($id)->delete();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\V1\StoreMessageRequest;
 use App\Http\Requests\V1\UpdateMessageRequest;
 use App\Models\Message;
@@ -107,5 +108,6 @@ class MessageController extends Controller
     public function destroy($id)
     {
         //
+        Message::find($id)->delete();
     }
 }

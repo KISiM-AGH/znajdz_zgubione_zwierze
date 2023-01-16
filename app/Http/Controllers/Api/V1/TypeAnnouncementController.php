@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreTypeAnnouncementRequest;
 use App\Http\Requests\V1\UpdateTypeAnnouncementRequest;
 use App\Models\TypeAnnouncement;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Role;
 use App\Http\Resources\V1\TypeAnnouncementResource;
 use App\Http\Resources\V1\TypeAnnouncementCollection;
@@ -93,5 +94,6 @@ class TypeAnnouncementController extends Controller
     public function destroy($id)
     {
         //
+        TypeAnnouncement::find($id)->delete();
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\MediaFileResource;
 use App\Http\Resources\V1\MediaFileCollection;
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Requests\V1\StoreMediaFileRequest;
 use App\Http\Requests\V1\UpdateMediaFileRequest;
@@ -108,5 +109,6 @@ class MediaFileController extends Controller
     public function destroy($id)
     {
         //
+        MediaFile::find($id)->delete();
     }
 }

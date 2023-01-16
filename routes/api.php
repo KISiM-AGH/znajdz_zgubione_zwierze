@@ -18,8 +18,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+Route::post('login', [App\Http\Controllers\Api\V1\UserController::class, 'login']);
+
+Route::middleware('auth:sanctum')->post('logout', [App\Http\Controllers\Api\V1\UserController::class, 'logout']);
+
+// Route::group(['namespace' => 'App\Http\Controllers\Api\V1', 'middleware' => 'auth:api'], function() {
+    
+//     Route::post('logout', [/*App\Http\Controllers\Api\V1\*/UserController::class, 'logout']);
+// });
+
 //current name: api/v1
-Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function() {
+Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1', 'middleware' => 'auth:sanctum'], function() {
     Route::apiResource('users', UserController::class);
     Route::apiResource('announcements', AnnouncementController::class);
     Route::apiResource('commentannouncements', CommentAnnouncementController::class);
@@ -33,4 +43,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], f
     Route::apiResource('userschats', UserChatController::class);
     Route::apiResource('chats', ChatController::class);
     Route::apiResource('userchats', UserChatController::class);
+    
+    
 });

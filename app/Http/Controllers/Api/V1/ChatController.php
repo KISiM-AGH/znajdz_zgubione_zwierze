@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\ChatResource;
@@ -24,7 +25,20 @@ class ChatController extends Controller
         $filter = new ChatFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
         $includeChatMessages = $request->query('includesMessages'); 
-        $chats = Chat::where($queryItems);
+        if($userAuth->tokenCan('chat:show-all'))
+        {
+            //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+            $chats = Chat::where($queryItems);
+        }
+        else if($userAuth->tokenCan('chat:show-own'))
+        {
+            $chats = Chat::where([[$queryItems], ['id_user', 'LIKE', $userAuth->id]]);
+        }
+        else
+        {
+            return response->json(["message" => "No access"], 403);
+        }
+        //$chats = Chat::where($queryItems);
         if($includeChatMessages)
         {
             $chats = $chats->with('messages');
@@ -117,5 +131,6 @@ class ChatController extends Controller
     public function destroy(Chat $chat)
     {
         //
+        $chat->delete();
     }
 }

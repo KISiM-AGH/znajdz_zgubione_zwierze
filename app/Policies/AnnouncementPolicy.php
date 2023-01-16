@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Announcement;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Auth;
 
 class AnnouncementPolicy
 {
@@ -18,7 +19,6 @@ class AnnouncementPolicy
      */
     public function viewAny(User $user)
     {
-        //
     }
 
     /**
@@ -31,6 +31,16 @@ class AnnouncementPolicy
     public function view(User $user, Announcement $announcement)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('announcement:show') && $authUser->tokenCan('announcement:show-own') )
+        {
+            return $user->id == $announcement->id_user;
+        }
+        else if(!$authUser->tokenCan('announcement:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -42,6 +52,12 @@ class AnnouncementPolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('announcement:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -54,6 +70,17 @@ class AnnouncementPolicy
     public function update(User $user, Announcement $announcement)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('announcement:update') && $authUser->tokenCan('announcement:update-own') )
+        {
+            return $user->id == $announcement->id_user;
+        }
+        else if(!$authUser->tokenCan('announcement:update-own'))
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -66,6 +93,16 @@ class AnnouncementPolicy
     public function delete(User $user, Announcement $announcement)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('announcement:destroy') && $authUser->tokenCan('announcement:destroy-own') )
+        {
+            return $user->id == $announcement->id_user;
+        }
+        else if(!$authUser->tokenCan('announcement:destroy-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

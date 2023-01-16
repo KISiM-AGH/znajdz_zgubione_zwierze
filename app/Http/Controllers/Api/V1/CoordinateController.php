@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\CoordinateResource;
 use App\Http\Resources\V1\CoordinateCollection;
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Requests\V1\StoreCoordinateRequest;
 use App\Http\Requests\V1\UpdateCoordinateRequest;
@@ -93,5 +94,6 @@ class CoordinateController extends Controller
     public function destroy($id)
     {
         //
+        Coordinate::find($id)->delete();
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreRoleRequest;
 use App\Http\Requests\V1\UpdateRoleRequest;
 use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\V1\RoleResource;
 use App\Http\Resources\V1\RoleCollection;
 use App\Filters\V1\RoleFilter;
@@ -107,5 +108,12 @@ class RoleController extends Controller
     public function destroy($id)
     {
         //
+        if($id > 3)
+            Role::find($id)->delete();
+        else
+        {
+            return response()->json(['error' => 'Role about this id has to exist. Unable to remove']);
+        }
+
     }
 }

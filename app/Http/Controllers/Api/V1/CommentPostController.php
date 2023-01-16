@@ -5,6 +5,7 @@ use App\Http\Resources\V1\CommentPostResource;
 use App\Http\Resources\V1\CommentPostCollection;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreCommentPostRequest;
 use App\Http\Requests\V1\UpdateCommentPostRequest;
@@ -92,5 +93,6 @@ class CommentPostController extends Controller
     public function destroy($id)
     {
         //
+        CommentPost::find($id)->delete();
     }
 }

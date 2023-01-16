@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Auth;
 
 class ChatPolicy
 {
@@ -19,6 +20,12 @@ class ChatPolicy
     public function viewAny(User $user)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('chat:show-all') && $authUser->tokenCan('chat:show-own') )
+        {
+            return $user->id == $announcement->id_user;
+        }
+        return true;
     }
 
     /**
@@ -31,6 +38,12 @@ class ChatPolicy
     public function view(User $user, Chat $chat)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('chat:show') && $authUser->tokenCan('chat:show-own') )
+        {
+            return $user->id == $chat->id_user;
+        }
+        return true;
     }
 
     /**
@@ -42,6 +55,12 @@ class ChatPolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('chat:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -54,6 +73,12 @@ class ChatPolicy
     public function update(User $user, Chat $chat)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('chat:update') && $authUser->tokenCan('chat:update-own') )
+        {
+            return $user->id == $announcement->id_user;
+        }
+        return true;
     }
 
     /**

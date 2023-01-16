@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreUserChatRequest;
 use App\Http\Requests\V1\UpdateUserChatRequest;
 use App\Models\UserChat;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\V1\UserChatResource;
 use App\Http\Resources\V1\UserChatCollection;
 
@@ -91,5 +92,6 @@ class UserChatController extends Controller
     public function destroy($id)
     {
         //
+        UserChat::find($id)->delete();
     }
 }

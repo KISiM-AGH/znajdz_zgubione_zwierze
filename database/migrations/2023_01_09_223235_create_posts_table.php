@@ -21,8 +21,8 @@ return new class extends Migration
             $table->boolean('is_ban');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_media_file');
-            $table->foreign('id_user')->references('id')->on('users');
-            $table->foreign('id_media_file')->references('id')->on('media_files');
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_media_file')->references('id')->on('media_files')->onDelete('cascade');
             $table->timestamps();
         });
     }

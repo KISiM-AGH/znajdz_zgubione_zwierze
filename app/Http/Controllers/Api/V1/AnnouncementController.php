@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\AnnouncementResource;
 use App\Http\Resources\V1\AnnouncementCollection;
@@ -22,12 +23,32 @@ class AnnouncementController extends Controller
         //
         $filter = new AnnouncementFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
-        $includeAnnouncementComments = $request->query('includesComments'); 
-        $announcements = Announcement::where($queryItems);
-        if($includeAnnouncementComments)
-        {
-            $announcements = $announcements->with('commentAnnouncements');
-        }
+        $includeAnnouncementComments = $request->query('includesComments');
+        $userAuth = Auth::user();
+
+        //return response()->json(["user" => $userAuth->id, "ann" => Announcement::where('id_user', 'LIKE' ,$userAuth->id)->get()]);
+        //dd($res);
+            if($userAuth->tokenCan('announcement:show-all'))
+            {
+                //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+                $announcements = Announcement::where($queryItems);
+            }
+            else if($userAuth->tokenCan('announcement:show-own'))
+            {
+                $announcements = Announcement::where([[$queryItems], ['id_user', 'LIKE', $userAuth->id]]);
+            }
+            else
+            {
+                return response->json(["message" => "No access"], 403);
+            }
+            
+            if($includeAnnouncementComments)
+            {
+                $announcements = $announcements->with('commentAnnouncements');
+            }
+            return new AnnouncementCollection($announcements->paginate()->appends($request->query()));
+       
+
         //dd($queryItems);
         //if(count($queryItems) == 0)
         //{
@@ -40,7 +61,7 @@ class AnnouncementController extends Controller
        
          //   return new AnnouncementCollection($announcement->appends($request->query()));
         //}
-        return new AnnouncementCollection($announcements->paginate()->appends($request->query()));
+        
     }
 
     /**
@@ -62,7 +83,11 @@ class AnnouncementController extends Controller
     public function store(StoreAnnouncementRequest $request)
     {
         //
-        return new AnnouncementResource(Announcement::create($request->all()));
+        if($this->authorize('create', Announcement::class))
+        {
+            return new AnnouncementResource(Announcement::create($request->all()));
+        }
+        
     }
 
     /**
@@ -75,13 +100,17 @@ class AnnouncementController extends Controller
     {
         //
         //return $announcement;
-        $includeAnnouncementComments = $request->query('includesComments'); 
-        if($includeAnnouncementComments)
+        if($this->authorize('view', $announcement))
         {
-            //$announcement = $announcement->with('commentAnnouncements');
-            return new AnnouncementResource($announcement->loadMissing('commentAnnouncements'));
+            $includeAnnouncementComments = $request->query('includesComments');
+            if($includeAnnouncementComments)
+            {
+                //$announcement = $announcement->with('commentAnnouncements');
+                return new AnnouncementResource($announcement->loadMissing('commentAnnouncements'));
+            }
+            return new AnnouncementResource($announcement);
         }
-        return new AnnouncementResource($announcement);
+        
     }
 
     /**
@@ -105,7 +134,10 @@ class AnnouncementController extends Controller
     public function update(UpdateAnnouncementRequest $request, Announcement $announcement)
     {
         //
-        $announcement->update($request->all());
+        if($this->authorize('update', $announcement))
+        {
+            $announcement->update($request->all());
+        };
     }
 
     /**
@@ -117,5 +149,9 @@ class AnnouncementController extends Controller
     public function destroy(Announcement $announcement)
     {
         //
+        if($this->authorize('delete', $announcement))
+        {
+            $announcement->delete();
+        };
     }
 }

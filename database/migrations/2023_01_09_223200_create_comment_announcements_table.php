@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('is_ban');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_announcement');
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('id_announcement')->references('id')->on('announcements')->onDelete('cascade');
             $table->timestamps();
         });

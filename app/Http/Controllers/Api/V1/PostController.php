@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\V1\StorePostRequest;
 use App\Http\Requests\V1\UpdatePostRequest;
 use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\V1\PostResource;
 use App\Http\Resources\V1\PostCollection;
 use App\Filters\V1\PostFilter;
@@ -121,5 +122,6 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+        Post::find($id)->delete();
     }
 }
