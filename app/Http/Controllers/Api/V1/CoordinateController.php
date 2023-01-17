@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\V1\StoreCoordinateRequest;
 use App\Http\Requests\V1\UpdateCoordinateRequest;
 use App\Models\Coordinate;
+use App\Models\Announcement;
 
 class CoordinateController extends Controller
 {
@@ -22,6 +23,47 @@ class CoordinateController extends Controller
     public function index()
     {
         //
+        $userAuth = Auth::user();
+        if($userAuth->tokenCan('coordinate:show-all'))
+        {
+            $chats = Coordinate::all();
+        }
+        else if($userAuth->tokenCan('coordinate:show-own'))
+        {
+            $userCoordinates = Announcement::where('id_user', 'LIKE', $userAuth->id)->get();
+            $isFirst = true;
+            foreach($userCoordinates as $userCoordinate)
+            {
+                if($isFirst)
+                {
+                    $firstCoordinate = Coordinate::where([['id', 'LIKE', $userCoordinate['id_coordinate']]])->get();    
+                    $isFirst = false;
+                }
+                $tmpCoordinate = Coordinate::where([['id', 'LIKE', $userCoordinate['id_coordinate']]])->get();
+                $firstCoordinate = $firstCoordiante->merge($tmpCoordinate);
+                $coordinates = $firstCoordinate->all();
+            }
+            if($userCoordinates->first())
+            {
+                $arrCoordinates = [];
+                foreach($coordinates as $coordinate)
+                {
+                    array_push($arrCoordinate, [
+                        "id" => $coordinate->id,
+                        "name" => $coordinate->name,
+                        "createdAt" => $coordinate->created_at,
+                        "updatedAt" => $coordinate->updated_at,
+                        "messages" => $coordinate->messages
+                    ]);
+                }
+                return response()->json(["chats" => $arrCoordinate], 200);
+            }
+            return response()->json(["message" => 'No content', "coordinates" => []], 404);
+        }
+        else
+        {
+            return response->json(["message" => "No access"], 403);
+        }
         return new CoordinateCollection(Coordinate::all());   
     }
 
@@ -44,7 +86,11 @@ class CoordinateController extends Controller
     public function store(/*Request $request*/ StoreCoordinateRequest $request)
     {
         //
-        return new CoordinateResource(Coordinate::create($request->all()));
+        $userAuth = Auth::user();
+        if($this->authorize('create', Coordinate::class))
+        {
+            return new CoordinateResource(Coordinate::create($request->all()));
+        }
     }
 
     /**
@@ -57,7 +103,10 @@ class CoordinateController extends Controller
     {
         //
         $coordinate = Coordinate::find($id);
-        return new CoordinateResource($coordinate);
+        if($this->authorize('view', $coordinate))
+        {
+            return new CoordinateResource($coordinate);
+        }
     }
 
     /**
@@ -82,7 +131,11 @@ class CoordinateController extends Controller
     {
         //
         $coordinate = Coordinate::find($id);
-        $coordinate->update($request->all());
+        if($this->authorize('update', $coordinate))
+        {
+            $coordinate->update($request->all());
+            return new CoordinateResource($coordinate);
+        }
     }
 
     /**
@@ -94,6 +147,10 @@ class CoordinateController extends Controller
     public function destroy($id)
     {
         //
-        Coordinate::find($id)->delete();
+        $coordinate = Coordinate::find($id);
+        if($this->authorize('delete'))
+        {
+            $coordinate->delete();
+        }
     }
 }

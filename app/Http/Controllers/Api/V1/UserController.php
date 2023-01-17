@@ -25,20 +25,25 @@ class UserController extends Controller
     public function index(Request $request)
     {
         //
+        $authUser = Auth::user();
         $filter = new UserFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
         //dd($queryItems);
-        if(count($queryItems) == 0)
+        if($authUser->tokenCan('user:show-all'))
         {
-            return new UserCollection(User::paginate());
+            if(count($queryItems) == 0)
+            {
+                return new UserCollection(User::paginate());
+            }
+            else
+            {
+                //dd(Announcement::where('id_user', 'like', 1)->get());
+                //dd(Announcement::where($queryItems));
+                $user = User::where($queryItems)->paginate();
+                return new UserCollection($user->appends($request->query()));
+            }
         }
-        else
-        {
-            //dd(Announcement::where('id_user', 'like', 1)->get());
-            //dd(Announcement::where($queryItems));
-            $user = User::where($queryItems)->paginate();
-            return new UserCollection($user->appends($request->query()));
-        }
+        
         //return new UserCollection(User::all());
     }
 
@@ -92,15 +97,21 @@ class UserController extends Controller
                 'media-file:show-own',
                 'comment-announcement:store',
                 'comment-announcement:destroy-own',
+                'comment-announcement:update-own',
                 'comment-announcement:show-own',
                 'comment-announcement:show',
+                'comment-announcement:show-all',
                 'comment-post:store',
                 'comment-post:destroy-own',
                 'comment-post:show-own',
                 'comment-post:show',
+                'comment-post:update-own',
+                'comment-post:show-all',
                 'coordinate:store',
                 'coordinate:destroy-own',
                 'coordinate:update-own',
+                'coordinate:show-all',
+                'coordinate:show',
                 'post:store',
                 'post:update-own',
                 'post:destroy-own',
@@ -111,19 +122,26 @@ class UserController extends Controller
                 'chat:store',
                 'chat:update-own',
                 'chat:destroy-own',
+                'message:show-own',
+                'message:destroy-own',
+                'message:update-own',
+                'message:store',
                 'userchat:show-own',
                 'userchat:store',
                 'userchat:update-own',
-                'userchat:destroy-own'
+                'userchat:destroy-own',
+                'user:update-own',
+                'user:destroy-own',
+                'user:show',
+                'user:show-all'
             ];
 
             $moderatorPermission = [
                 'announcement:update',
                 'announcement:destroy',
-                'comment-announcement:store',
+                'comment-announcement:update',
                 'comment-announcement:destroy',
-                'comment-post:destroy',
-                'coordinate:store',
+                'comment-post:update',
                 'post:update',
                 'post:destroy',
                 ...$seekerFinderPermission
@@ -133,27 +151,24 @@ class UserController extends Controller
                 'comment-announcement:destroy',
                 'comment-post:destroy',
                 'coordinate:show-all',
-                'coordinate:show',
                 'coordinate:update',
                 'coordinate:destroy',
                 'media-file:show-all',
                 'media-file:destroy',
                 'media-file:update',
-                'comment-announcement:update',
-                'comment-announcement:show-all',
                 'comment-post:destroy',
-                'post:update',
-                'post:destroy',
                 'chat:show-all',
                 'chat:show',
                 'chat:update',
                 'chat:destroy',
+                'message:show-all',
+                'message:show',
+                'message:destroy',
+                'message:update',
                 'userchat:show',
                 'userchat:show-all',
                 'userchat:update',
                 'userchat:destroy',
-                'user:show-all',
-                'user:show',
                 'user:destroy',
                 'user:update',
                 ...$moderatorPermission
@@ -218,7 +233,11 @@ class UserController extends Controller
     public function show(User $user)
     {
         //
-        return new UserResource($user);
+        $authUser = Auth::user();
+        if($authUser->tokenCan('user:show'))
+        {
+            return new UserResource($user);
+        }
     }
 
     /**
@@ -243,7 +262,26 @@ class UserController extends Controller
     {
         //
         //$user = User::find($id);
-        $user->update($request->all());
+        $authUser = Auth::user();
+        if($authUser->tokenCan('user:update'))
+        {
+            $user->update($request->all());
+            return new UserResource($user);
+        }
+        if($authUser->tokenCan('user:update-own'))
+        {
+            if($authUser->id == $user->id)
+            {
+                $user->update($request->all());
+                return new UserResource($user);
+            }
+        }
+        else
+        {
+            return response()->json([
+                "message" => 'You have not permission'
+            ], 403);
+        }
     }
 
     /**
@@ -255,6 +293,24 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
-        $user->delete();
+        $authUser = Auth::user();
+        if($authUser->tokenCan('user:delete'))
+        {
+            $user->delete();
+        }
+        if($authUser->tokenCan('user:delete-own'))
+        {
+            if($authUser->id == $user->id)
+            {
+                $user->delete();
+            }
+        }
+        else
+        {
+            return response()->json([
+                "message" => 'You have not permission'
+            ], 403);
+        }
+        
     }
 }

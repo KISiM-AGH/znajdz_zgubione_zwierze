@@ -23,20 +23,61 @@ class MediaFileController extends Controller
     public function index(Request $request)
     {
         //
+        $userAuth = Auth::user();
         $filter = new MediaFileFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
+        $includeOwnMediaFiles = $request->query('ownMediaFiles');
         //dd($queryItems);
-        if(count($queryItems) == 0)
+        if($userAuth->tokenCan('media-file:show-all'))
         {
-            return new MediaFileCollection(MediaFile::paginate());
-        }
-        else
-        {
-            //dd(Announcement::where('id_user', 'like', 1)->get());
-            //dd(Announcement::where($queryItems));
-            $mediaFile = MediaFile::where($queryItems)->paginate();
-            return new MediaFileCollection($mediaFile->appends($request->query()));
-        }
+                //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+                if($includeOwnMediaFiles)
+                {
+                    if(count($queryItems) == 0)
+                    {
+                        $mediaFile = MediaFile::where([['id_user', 'LIKE', $userAuth->id]])->paginate();
+                        return new MediaFileCollection($mediaFile);
+                    }
+                    else
+                    {
+                        //dd(Announcement::where('id_user', 'like', 1)->get());
+                        //dd(Announcement::where($queryItems));
+                        $mediaFile = MediaFile::where([$queryItems, ['id_user', 'LIKE', $userAuth->id]])->paginate();
+                        return new MediaFileCollection($mediaFile->appends($request->query()));
+                    }
+                }
+                if(count($queryItems) == 0)
+                {
+                    return new MediaFileCollection(MediaFile::paginate());
+                }
+                else
+                {
+                        //dd(Announcement::where('id_user', 'like', 1)->get());
+                        //dd(Announcement::where($queryItems));
+                    $mediaFile = MediaFile::where($queryItems)->paginate();
+                    return new MediaFileCollection($mediaFile->appends($request->query()));
+                }
+            }
+            else if($userAuth->tokenCan('media-file:show-own'))
+            {
+                if(count($queryItems) == 0)
+                {
+                    $mediaFile = MediaFile::where([['id_user', 'LIKE', $userAuth->id]])->paginate();
+                    return new MediaFileCollection($mediaFile);
+                }
+                else
+                {
+                    //dd(Announcement::where('id_user', 'like', 1)->get());
+                    //dd(Announcement::where($queryItems));
+                    $mediaFile = MediaFile::where([$queryItems, ['id_user', 'LIKE', $userAuth->id]])->paginate();
+                    return new MediaFileCollection($mediaFile->appends($request->query()));
+                }
+            }
+            else
+            {
+                return response()->json(["message" => "No access"], 403);
+            }
+ 
         //return new MediaFileCollection(MediaFile::all()); 
     }
 
@@ -59,7 +100,10 @@ class MediaFileController extends Controller
     public function store(/*Request $request*/ StoreMediaFileRequest $request)
     {
         //
-        return new MediaFileResource(MediaFile::create($request->all()));
+        if($this->authorize('create', MediaFile::class))
+        {
+            return new MediaFileResource(MediaFile::create($request->all()));
+        }
     }
 
     /**
@@ -72,7 +116,10 @@ class MediaFileController extends Controller
     {
         //
         $mediaFile = MediaFile::find($id);
-        return new MediaFileResource($mediaFile);
+        if($this->authorize('view', $mediaFile))
+        {
+            return new MediaFileResource($mediaFile);
+        }
     }
 
     /**
@@ -97,7 +144,11 @@ class MediaFileController extends Controller
     {
         //
         $mediaFile = MediaFile::find($id);
-        $mediaFile->update($request->all());
+        if($this->authorize('update', $mediaFile))
+        {
+            $mediaFile->update($request->all());
+            return new MediaFileResource($mediaFile);
+        }
     }
 
     /**
@@ -109,6 +160,11 @@ class MediaFileController extends Controller
     public function destroy($id)
     {
         //
-        MediaFile::find($id)->delete();
+        $mediaFile = MediaFile::find($id);
+        if($this->authorize('delete', $mediaFile))
+        {
+            $mediaFile->delete();
+        }
+        
     }
 }

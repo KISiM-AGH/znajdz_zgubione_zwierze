@@ -10,6 +10,7 @@ use App\Http\Resources\V1\ChatCollection;
 use App\Http\Requests\V1\StoreChatRequest;
 use App\Http\Requests\V1\UpdateChatRequest;
 use App\Models\Chat;
+use App\Models\UserChat;
 use App\Filters\V1\ChatFilter;
 
 class ChatController extends Controller
@@ -25,36 +26,125 @@ class ChatController extends Controller
         $filter = new ChatFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
         $includeChatMessages = $request->query('includesMessages'); 
+        $includeOwnChats = $request->query('ownChats');
+        $userAuth = Auth::user();
         if($userAuth->tokenCan('chat:show-all'))
         {
-            //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
-            $chats = Chat::where($queryItems);
+            if($includeOwnChats)
+            {
+                $userChats = UserChat::where('id_user', 'LIKE', $userAuth->id)->get();
+                $isFirst = true;
+                foreach($userChats as $userChat )
+                {
+                    if($isFirst) 
+                    {
+                        if($includeChatMessages)
+                        {
+                            $firstChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->with('messages')->get();
+                        }
+                        else
+                        {
+                            $firstChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->get();
+                        }
+                        
+                        $isFirst = false;
+                    }
+                    if($includeChatMessages)
+                    {
+                        $tmpChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->with('messages')->get();
+                    }
+                    else
+                    {
+                        $tmpChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->get();
+                    }
+                    
+                    $firstChat = $firstChat->merge($tmpChat);
+                    $chats = $firstChat->all();
+                    
+                }
+                if($userChats->first())
+                {
+                    
+                    $includeChatMessages = false;
+                    $arrChat = [];
+                    foreach($chats as $chat)
+                    {
+                        array_push($arrChat, [
+                            "id" => $chat->id,
+                            "name" => $chat->name,
+                            "createdAt" => $chat->created_at,
+                            "updatedAt" => $chat->updated_at,
+                            "messages" => $chat->messages
+                        ]);
+                    }
+                    return response()->json(["chats" => $arrChat], 200);
+                }
+                return response()->json(["message" => 'No content', 'chats' => []], 404);
+            }
+            else
+            {
+                $chats = Chat::where($queryItems);
+            }
         }
         else if($userAuth->tokenCan('chat:show-own'))
         {
-            $chats = Chat::where([[$queryItems], ['id_user', 'LIKE', $userAuth->id]]);
+            $userChats = UserChat::where('id_user', 'LIKE', $userAuth->id)->get();
+            $isFirst = true;
+            foreach($userChats as $userChat )
+            {
+                if($isFirst)
+                {
+                    if($includeChatMessages)
+                    {
+                        $firstChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->with('messages')->get();
+                    }
+                    else
+                    {
+                        $firstChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->get();
+                    }
+                    
+                    $isFirst = false;
+                }
+                if($includeChatMessages)
+                {
+                    $tmpChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->with('messages')->get();
+                }
+                else
+                {
+                    $tmpChat = Chat::where([[$queryItems], ['id', 'LIKE', $userChat['id_chat']]])->get();
+                }
+                
+                $firstChat = $firstChat->merge($tmpChat);
+                $chats = $firstChat->all();
+                
+            }
+            if($userChats->first())
+            {
+                
+                $includeChatMessages = false;
+                $arrChat = [];
+                foreach($chats as $chat)
+                {
+                    array_push($arrChat, [
+                        "id" => $chat->id,
+                        "name" => $chat->name,
+                        "createdAt" => $chat->created_at,
+                        "updatedAt" => $chat->updated_at,
+                        "messages" => $chat->messages
+                    ]);
+                }
+                return response()->json(["chats" => $arrChat], 200);
+            }
+            return response()->json(["message" => 'No content', "chats" => []], 404);
         }
         else
         {
             return response->json(["message" => "No access"], 403);
         }
-        //$chats = Chat::where($queryItems);
         if($includeChatMessages)
         {
             $chats = $chats->with('messages');
         }
-        //dd($queryItems);
-        // if(count($queryItems) == 0)
-        // {
-        //     return new ChatCollection(Chat::paginate());
-        // }
-        // else
-        // {
-        //     //dd(Announcement::where('id_user', 'like', 1)->get());
-        //     //dd(Announcement::where($queryItems));
-        //     $chat = Chat::where($queryItems)->paginate();
-        //     return new ChatCollection($chat->appends($request->query()));
-        // }
         return new ChatCollection($chats->paginate()->appends($request->query()));
     }
 
@@ -77,7 +167,13 @@ class ChatController extends Controller
     public function store(StoreChatRequest $request)
     {
         //
-        return new ChatResource(Chat::create($request->all()));
+        $userAuth = Auth::user();
+        if($this->authorize('create', Chat::class))
+        {
+            $newChat = new ChatResource(Chat::create($request->all()));
+            UserChat::create(['id_user' => $userAuth->id, 'id_chat' => $newChat->id]);
+            return $newChat;
+        }
     }
 
     /**
@@ -88,14 +184,15 @@ class ChatController extends Controller
      */
     public function show(Chat $chat, Request $request)
     {
-        //
-        $includeMessages = $request->query('includesMessages'); 
-        if($includeMessages)
+        if($this->authorize('view', $chat))
         {
-            //$announcement = $announcement->with('commentAnnouncements');
-            return new ChatResource($chat->loadMissing('messages'));
+            $includeMessages = $request->query('includesMessages');
+            if($includeMessages)
+            {
+                return new ChatResource($chat->loadMissing('messages'));
+            }
+            return new ChatResource($chat);
         }
-        return new ChatResource($chat);
     }
 
     /**
@@ -119,7 +216,12 @@ class ChatController extends Controller
     public function update(UpdateChatRequest $request, Chat $chat)
     {
         // 
-        $chat->update($request->all());
+        if($this->authorize('update', $chat))
+        {
+            $chat->update($request->all());
+            return new ChatResource($chat);
+        }
+        
     }
 
     /**
@@ -131,6 +233,9 @@ class ChatController extends Controller
     public function destroy(Chat $chat)
     {
         //
-        $chat->delete();
+        if($this->authorize('delete', $chat))
+        {
+            $chat->delete();
+        };
     }
 }

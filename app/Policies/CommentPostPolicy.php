@@ -32,6 +32,16 @@ class CommentPostPolicy
     public function view(User $user, CommentPost $commentPost)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('comment-post:show') && $authUser->tokenCan('comment-post:show-own') )
+        {
+            return $user->id == $commentPost->id_user;
+        }
+        else if(!$authUser->tokenCan('comment-post:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -43,6 +53,12 @@ class CommentPostPolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('comment-post:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,6 +71,17 @@ class CommentPostPolicy
     public function update(User $user, CommentPost $commentPost)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('comment-post:update') && $authUser->tokenCan('comment-post:update-own') )
+        {
+            return $user->id == $commentPost->id_user;
+        }
+        else if(!$authUser->tokenCan('comment-post:update-own'))
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -67,6 +94,16 @@ class CommentPostPolicy
     public function delete(User $user, CommentPost $commentPost)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('comment-post:destroy') && $authUser->tokenCan('comment-post:destroy-own') )
+        {
+            return $user->id == $commentPost->id_user;
+        }
+        else if(!$authUser->tokenCan('comment-post:destroy-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

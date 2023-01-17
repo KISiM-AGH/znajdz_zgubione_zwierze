@@ -22,20 +22,61 @@ class MessageController extends Controller
     public function index(Request $request)
     {
         //
+        $userAuth = Auth::user();
         $filter = new MessageFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
+        $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
+        $includeOwnMessages = $request->query('ownMessages');
         //dd($queryItems);
-        if(count($queryItems) == 0)
+        if($userAuth->tokenCan('message:show-all'))
         {
-            return new MessageCollection(Chat::paginate());
-        }
-        else
-        {
-            //dd(Announcement::where('id_user', 'like', 1)->get());
-            //dd(Announcement::where($queryItems));
-            $message = Message::where($queryItems)->paginate();
-            return new MessageCollection($message->appends($request->query()));
-        }
+                //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+                if($includeOwnMessages)
+                {
+                    if(count($queryItems) == 0)
+                    {
+                        $messages = Message::where([['id_user', 'LIKE', $userAuth->id]])->paginate();
+                        return new MessageCollection$messages);
+                    }
+                    else
+                    {
+                        //dd(Announcement::where('id_user', 'like', 1)->get());
+                        //dd(Announcement::where($queryItems));
+                        $messages = Message::where([$queryItems, ['id_user', 'LIKE', $userAuth->id]])->paginate();
+                        return new MessageCollection($messages->appends($request->query()));
+                    }
+                }
+                if(count($queryItems) == 0)
+                {
+                    return new MessageResource(Message::paginate());
+                }
+                else
+                {
+                        //dd(Announcement::where('id_user', 'like', 1)->get());
+                        //dd(Announcement::where($queryItems));
+                    $messages = Message::where($queryItems)->paginate();
+                    return new MessageCollection($messages->appends($request->query()));
+                }
+            }
+            else if($userAuth->tokenCan('media-file:show-own'))
+            {
+                if(count($queryItems) == 0)
+                {
+                    $messages = Message::where([['id_user', 'LIKE', $userAuth->id]])->paginate();
+                    return new MessageCollection($messages);
+                }
+                else
+                {
+                    //dd(Announcement::where('id_user', 'like', 1)->get());
+                    //dd(Announcement::where($queryItems));
+                    $messages = Message::where([$queryItems, ['id_user', 'LIKE', $userAuth->id]])->paginate();
+                    return new MessageCollection($mediaFile->appends($request->query()));
+                }
+            }
+            else
+            {
+                return response()->json(["message" => "No access"], 403);
+            }
         //return new MessageCollection(Message::all());
     }
 
@@ -58,7 +99,10 @@ class MessageController extends Controller
     public function store(/*Request $request*/ StoreMessageRequest $request)
     {
         //
-        return new MessageResource(Message::create($request->all()));
+        if($this->authorize('create', Message::class))
+        {
+            return new MessageResource(Message::create($request->all()));
+        }
     }
 
     /**
@@ -71,7 +115,10 @@ class MessageController extends Controller
     {
         //
         $message = Message::find($id);
-        return new MessageResource($message);
+        if($this->authorize('view', $message))
+        {
+            return new MessageResource($message);
+        }
     }
 
     /**
@@ -96,7 +143,12 @@ class MessageController extends Controller
     {
         //
         $message = Message::find($id);
-        $message->update($request->all());
+        if($this->authorize('update', $message))
+        {
+            $message->update($request->all());
+            return new MessageResource($message);
+        }
+        
     }
 
     /**
@@ -108,6 +160,10 @@ class MessageController extends Controller
     public function destroy($id)
     {
         //
-        Message::find($id)->delete();
+        $message = Message::find($id);
+        if($this->authorize('delete', $message))
+        {
+            $message->delete();
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Coordinate;
 use App\Models\User;
+use App\Models\Announcement;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +33,22 @@ class CoordinatePolicy
     public function view(User $user, Coordinate $coordinate)
     {
         //
+        $authUser = Auth::user();
+        $userAnnouncement = Announcement::where('id_user', 'LIKE', $authUser->id)->where('id_coordinate', 'LIKE', $coordinate->id)->get();
+        if(!$authUser->tokenCan('coordinate:show') && $authUser->tokenCan('coordinate:show-own') )
+        {
+            if($userAnnouncement->first())
+                return $coordinate->id == $userAnnouncement[0]->id;
+            else
+            {
+                return false;
+            }
+        }
+        else if(!$authUser->tokenCan('coordinate:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -43,6 +60,12 @@ class CoordinatePolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('coordinate:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,6 +78,20 @@ class CoordinatePolicy
     public function update(User $user, Coordinate $coordinate)
     {
         //
+        $authUser = Auth::user();
+        $userCoordinate = Announcement::where('id_user', 'LIKE', $authUser->id)->where('id_coordinate', 'LIKE', $coordinate->id)->get();
+        if(!$authUser->tokenCan('coordinate:update') && $authUser->tokenCan('coordinate:update-own') )
+        {
+            if($userCoordinate->first())
+                return $userCoordinate[0]->id_coordinate == $coordinate->id;
+            else 
+            return false;
+        }
+        else if(!$authUser->tokenCan('coordinate:update-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -67,6 +104,20 @@ class CoordinatePolicy
     public function delete(User $user, Coordinate $coordinate)
     {
         //
+        $authUser = Auth::user();
+        $userCoordinate = Announcement::where('id_user', 'LIKE', $authUser->id)->where('id_coordinate', 'LIKE', $coordinate->id)->get();
+        if(!$authUser->tokenCan('coordinate:destroy') && $authUser->tokenCan('coordinate:destroy-own') )
+        {
+            if($userCoordinate->first())
+                return $userCoordinate[0]->id_coordinate == $coordinate->id;
+            else 
+            return false;
+        }
+        else if(!$authUser->tokenCan('coordinate:destroy-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -22,14 +22,92 @@ class PostController extends Controller
     public function index(Request $request)
     {
         //
+        $userAuth = Auth::user();
         $filter = new PostFilter();
         $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
-        $includePostComments = $request->query('includesComments'); 
-        $posts = Post::where($queryItems);
-        if($includePostComments)
+        $includePostComments = $request->query('includesComments');
+        $queryItems = $filter->transform($request);// ['column' , 'operator', 'value']
+        $includeOwnPosts = $request->query('ownPosts');
+        //dd($queryItems);
+        if($userAuth->tokenCan('post:show-all'))
         {
-            $posts = $posts->with('commentPosts');
-        }
+                //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+                if($includeOwnPosts)
+                {
+                    if(count($queryItems) == 0)
+                    {
+                        $posts = Post::where([['id_user', 'LIKE', $userAuth->id]]);
+                        if($includePostComments)
+                        {
+                            $posts = $posts->with('commentPosts');
+                        }
+                        return new PostCollection($posts->paginate());
+                    }
+                    else
+                    {
+                        //dd(Announcement::where('id_user', 'like', 1)->get());
+                        //dd(Announcement::where($queryItems));
+                        $posts = Post::where([$queryItems, ['id_user', 'LIKE', $userAuth->id]]);
+                        if($includePostComments)
+                        {
+                            $posts = $posts->with('commentPosts');
+                        }
+                        return new PostCollection($posts->paginate()->appends($request->query()));
+                    }
+                }
+                if(count($queryItems) == 0)
+                {
+                    $posts = Post::paginate();
+                    if($includePostComments)
+                    {
+                        $posts = $posts->with('commentPosts');
+                    }
+                    return new PostCollection($posts);
+                }
+                else
+                {
+                        //dd(Announcement::where('id_user', 'like', 1)->get());
+                        //dd(Announcement::where($queryItems));
+                    $posts = Post::where($queryItems);
+                    if($includePostComments)
+                    {
+                        $posts = $posts->with('commentPosts');
+                    }
+                    return new PostCollection($posts->paginate()->appends($request->query()));
+                }
+            }
+            else if($userAuth->tokenCan('post:show-own'))
+            {
+                if(count($queryItems) == 0)
+                {
+                    $posts = Post::where([['id_user', 'LIKE', $userAuth->id]]);
+                    if($includePostComments)
+                    {
+                        $posts = $posts->with('commentPosts');
+                    }
+                    return new PostCollection($posts->paginate());
+                }
+                else
+                {
+                    //dd(Announcement::where('id_user', 'like', 1)->get());
+                    //dd(Announcement::where($queryItems));
+                    $posts = Post::where([$queryItems, ['id_user', 'LIKE', $userAuth->id]])->paginate();
+                    if($includePostComments)
+                    {
+                        $posts = $posts->with('commentPosts');
+                    }
+                    return new PostCollection($posts->appends($request->query()));
+                }
+            }
+            else
+            {
+                return response()->json(["message" => "No access"], 403);
+            } 
+        // $posts = Post::where($queryItems);
+        // if($includePostComments)
+        // {
+        //     $posts = $posts->with('commentPosts');
+        // }
         //dd($queryItems);
         //if(count($queryItems) == 0)
         //{
@@ -44,7 +122,7 @@ class PostController extends Controller
         //}
         //return new PostCollection(Post::all());
 
-        return new PostCollection($posts->paginate()->appends($request->query()));
+        //return new PostCollection($posts->paginate()->appends($request->query()));
     }
 
     /**
@@ -66,7 +144,10 @@ class PostController extends Controller
     public function store(/*Request $request*/ StorePostRequest $request)
     {
         //
-        return new PostResource(Post::create($request->all()));
+        if($this->authorize('create', Post::class))
+        {
+            return new PostResource(Post::create($request->all()));
+        }
     }
 
     /**
@@ -79,13 +160,16 @@ class PostController extends Controller
     {
         //
         $post = Post::find($id);
-        $includePostComments = $request->query('includesComments'); 
-        if($includePostComments)
+        if($this->authorize('view', $post))
         {
-            //$announcement = $announcement->with('commentAnnouncements');
-            return new PostResource($post->loadMissing('commentPosts'));
+            $includePostComments = $request->query('includesComments'); 
+            if($includePostComments)
+            {
+                //$announcement = $announcement->with('commentAnnouncements');
+                return new PostResource($post->loadMissing('commentPosts'));
+            }
+            return new PostResource($post);
         }
-        return new PostResource($post);
     }
 
     /**
@@ -110,7 +194,11 @@ class PostController extends Controller
     {
         //
         $post = Post::find($id);
-        $post->update($request->all());
+        if($this->authorize('update', $post))
+        {
+            $post->update($request->all());
+            return new PostResource($post);
+        }
     }
 
     /**
@@ -122,6 +210,10 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
-        Post::find($id)->delete();
+        $post = Post::find($id);
+        if($this->authorize('delete', $post))
+        {
+            $post->delete();
+        }
     }
 }

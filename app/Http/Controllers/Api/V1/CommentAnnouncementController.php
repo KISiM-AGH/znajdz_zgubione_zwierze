@@ -22,7 +22,25 @@ class CommentAnnouncementController extends Controller
     public function index()
     {
         //
-        return new CommentAnnouncementCollection(CommentAnnouncement::all());
+        $userAuth = Auth::user();
+
+        //return response()->json(["user" => $userAuth->id, "ann" => Announcement::where('id_user', 'LIKE' ,$userAuth->id)->get()]);
+        //dd($res);
+        if($userAuth->tokenCan('comment-announcement:show-all'))
+        {
+             //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+             $commentAnnouncements = CommentAnnouncement::all();
+        }
+        else if($userAuth->tokenCan('comment-announcement:show-own'))
+        {
+            $commentAnnouncements = CommentAnnouncement::where(['id_user', 'LIKE', $userAuth->id]);
+        }
+        else
+        {
+            return response()->json(["message" => "No access"], 403);
+        }
+        //return response()->json(["message" => $commentAnnouncements->paginate()], 200);
+        return new CommentAnnouncementCollection($commentAnnouncements);
     }
 
     /**
@@ -44,9 +62,11 @@ class CommentAnnouncementController extends Controller
     public function store(/*Request $request*/ StoreCommentAnnouncementRequest $request)
     {
         //
-        return new CommentAnnouncementResource(CommentAnnouncement::create($request->all()));
+        if($this->authorize('create', CommentAnnouncement::class))
+        {
+            return new CommentAnnouncementResource(CommentAnnouncement::create($request->all()));
+        }
     }
-
     /**
      * Display the specified resource.
      *
@@ -57,7 +77,11 @@ class CommentAnnouncementController extends Controller
     {
         //
         $commentAnnouncement = CommentAnnouncement::find($id);
-        return new CommentAnnouncementResource($commentAnnouncement);
+        if($this->authorize('view', $commentAnnouncement))
+        {
+            return new CommentAnnouncementResource($commentAnnouncement);
+        }
+        
     }
 
     /**
@@ -82,7 +106,11 @@ class CommentAnnouncementController extends Controller
     {
         //
         $commentAnnouncement = CommentAnnouncement::find($id);
-        $commentAnnouncement->update($request->all());
+        if($this->authorize('update', $commentAnnouncement))
+        {
+            $commentAnnouncement->update($request->all());
+            return new commentAnnouncementResource($commentAnnouncement);
+        }
     }
 
     /**
@@ -94,6 +122,11 @@ class CommentAnnouncementController extends Controller
     public function destroy($id)
     {
         //
-        CommentAnnouncement::find($id)->delete();
+        $commentAnnouncement = CommentAnnouncement::find($id);
+        if($this->authorize('delete', $commentAnnouncement))
+        {
+            $commentAnnouncement->delete();
+        };
+        
     }
 }

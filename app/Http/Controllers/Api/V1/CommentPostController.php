@@ -21,7 +21,25 @@ class CommentPostController extends Controller
     public function index()
     {
         //
-        return new CommentPostCollection(CommentPost::all());
+        $userAuth = Auth::user();
+
+        //return response()->json(["user" => $userAuth->id, "ann" => Announcement::where('id_user', 'LIKE' ,$userAuth->id)->get()]);
+        //dd($res);
+        if($userAuth->tokenCan('comment-post:show-all'))
+        {
+             //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+             $commentPosts = CommentPost::all();
+        }
+        else if($userAuth->tokenCan('comment-post:show-own'))
+        {
+            $commentPosts = CommentPost::where([ ['id_user', 'LIKE', $userAuth->id]]);
+        }
+        else
+        {
+            return response()->json(["message" => "No access"], 403);
+        }
+        //return new CommentAnnouncementCollection(CommentAnnouncement::all());
+        return new CommentPostCollection($commentPosts);
     }
 
     /**
@@ -43,7 +61,10 @@ class CommentPostController extends Controller
     public function store(/*Request $request*/ StoreCommentPostRequest $request)
     {
         //
-        return new CommentPostResource(CommentPost::create($request->all()));
+        if($this->authorize('create', CommentPost::class))
+        {
+            return new CommentPostResource(CommentPost::create($request->all()));
+        }
     }
 
     /**
@@ -56,7 +77,10 @@ class CommentPostController extends Controller
     {
         //
         $commentPost = CommentPost::find($id);
-        return new CommentPostResource($commentPost);
+        if($this->authorize('view', $commentPost))
+        {
+            return new CommentPostResource($commentPost);
+        }
     }
 
     /**
@@ -81,7 +105,11 @@ class CommentPostController extends Controller
     {
         //
         $commentPost = CommentPost::find($id);
-        $commentPost->update($request->all());
+        if($this->authorize('update', $commentPost))
+        {
+            $commentPost->update($request->all());
+            return new CommentPostResource($commentPost);
+        }
     }
 
     /**
@@ -93,6 +121,10 @@ class CommentPostController extends Controller
     public function destroy($id)
     {
         //
-        CommentPost::find($id)->delete();
+        $commentAnnouncement = CommentPost::find($id);
+        if($this->authorize('delete', $commentAnnouncement))
+        {
+            $commentAnnouncement->delete();
+        }
     }
 }

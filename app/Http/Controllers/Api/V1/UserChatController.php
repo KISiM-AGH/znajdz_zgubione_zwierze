@@ -21,7 +21,22 @@ class UserChatController extends Controller
     public function index()
     {
         //
-        return  new  UserChatCollection(UserChat::all());
+        $userAuth = Auth::user();
+        if($userAuth->tokenCan('userchat:show-all'))
+            {
+                //return response()->json(["user" => $userAuth->tokenCan('announcement:show-all')]);
+                $userChats = UserChat::all();
+            }
+            else if($userAuth->tokenCan('userchat:show-own'))
+            {
+                $userChats = UserChat::where([['id_user', 'LIKE', $userAuth->id]]);
+            }
+            else
+            {
+                return response()->json(["message" => "No access"], 403);
+            }
+            
+        return  new  UserChatCollection($userChats->paginate());
     }
 
     /**
@@ -43,7 +58,10 @@ class UserChatController extends Controller
     public function store(/*Request $request*/ StoreUserChatRequest $request)
     {
         //
-        return new UserChatResource(UserChat::create($request->all()));
+        if($this->authorize('create', UserChat::class))
+        {
+            return new UserChatResource(UserChat::create($request->all()));
+        }
     }
 
     /**
@@ -55,7 +73,11 @@ class UserChatController extends Controller
     public function show($id)
     {
         //
-        return new UserChatResource(UserChat::find($id));
+        $userChat = UserChat::find($id);
+        if($this->authorize('view', $userChat))
+        {
+            return new UserChatResource($userChat);
+        }
     }
 
     /**
@@ -80,7 +102,11 @@ class UserChatController extends Controller
     {
         //
         $userChat = UserChat::find($id);
-        $userChat->update($request->all());
+        if($this->authorize('update', $userChat))
+        {
+            $userChat->update($request->all());
+            return new UserChatResource($userChat);
+        }
     }
 
     /**
@@ -92,6 +118,11 @@ class UserChatController extends Controller
     public function destroy($id)
     {
         //
-        UserChat::find($id)->delete();
+        $userChat = UserChat::find($id);
+        if($this->authorize('delete', $userChat))
+        {
+            $userChat->delete();
+        }
+            
     }
 }

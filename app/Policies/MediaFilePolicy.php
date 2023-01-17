@@ -32,6 +32,16 @@ class MediaFilePolicy
     public function view(User $user, MediaFile $mediaFile)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('media-file:show') && $authUser->tokenCan('media-file:show-own') )
+        {
+            return $user->id == $mediaFile->id_user;
+        }
+        else if(!$authUser->tokenCan('media-file:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -43,6 +53,12 @@ class MediaFilePolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('media-file:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,6 +71,17 @@ class MediaFilePolicy
     public function update(User $user, MediaFile $mediaFile)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('media-file:update') && $authUser->tokenCan('media-file:update-own') )
+        {
+            return $user->id == $mediaFile->id_user;
+        }
+        else if(!$authUser->tokenCan('media-file:update-own'))
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -67,6 +94,16 @@ class MediaFilePolicy
     public function delete(User $user, MediaFile $mediaFile)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('media-file:destroy') && $authUser->tokenCan('media-file:destroy-own') )
+        {
+            return $user->id == $mediaFile->id_user;
+        }
+        else if(!$authUser->tokenCan('media-file:destroy-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

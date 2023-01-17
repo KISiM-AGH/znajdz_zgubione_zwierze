@@ -36,7 +36,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         Announcement::class => AnnouncementPolicy::class,
-        Chat::class => ChattPolicy::class,
+        Chat::class => ChatPolicy::class,
         CommentAnnouncement::class => CommentAnnouncementPolicy::class,
         CommentPostPolicy::class => CommentPostPolicy::class,
         Coordinate::class => CoordinatePolicy::class,

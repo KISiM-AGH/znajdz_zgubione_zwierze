@@ -39,7 +39,7 @@ class AnnouncementController extends Controller
             }
             else
             {
-                return response->json(["message" => "No access"], 403);
+                return response()->json(["message" => "No access"], 403);
             }
             
             if($includeAnnouncementComments)
@@ -137,7 +137,8 @@ class AnnouncementController extends Controller
         if($this->authorize('update', $announcement))
         {
             $announcement->update($request->all());
-        };
+            return new AnnouncementResource($announcement);
+        }
     }
 
     /**

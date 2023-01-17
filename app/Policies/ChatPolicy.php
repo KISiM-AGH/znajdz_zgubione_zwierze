@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Chat;
 use App\Models\User;
+use App\Models\UserChat;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,6 +26,10 @@ class ChatPolicy
         {
             return $user->id == $announcement->id_user;
         }
+        else if(!$authUser->tokenCan('chat:show-own'))
+        {
+            return false;
+        }
         return true;
     }
 
@@ -39,9 +44,19 @@ class ChatPolicy
     {
         //
         $authUser = Auth::user();
+        $userChat = UserChat::where('id_user', 'LIKE', $authUser->id)->where('id_chat', 'LIKE', $chat->id)->get();
         if(!$authUser->tokenCan('chat:show') && $authUser->tokenCan('chat:show-own') )
         {
-            return $user->id == $chat->id_user;
+            if($userChat->first())
+                return $chat->id == $userChat[0]->id_chat;
+            else
+            {
+                return false;
+            }
+        }
+        else if(!$authUser->tokenCan('chat:show-own'))
+        {
+            return false;
         }
         return true;
     }
@@ -74,9 +89,17 @@ class ChatPolicy
     {
         //
         $authUser = Auth::user();
+        $userChat = UserChat::where('id_user', 'LIKE', $authUser->id)->where('id_chat', 'LIKE', $chat->id)->get();
         if(!$authUser->tokenCan('chat:update') && $authUser->tokenCan('chat:update-own') )
         {
-            return $user->id == $announcement->id_user;
+            if($userChat->first())
+                return $userChat[0]->id_chat == $chat->id;
+            else 
+            return false;
+        }
+        else if(!$authUser->tokenCan('chat:update-own'))
+        {
+            return false;
         }
         return true;
     }
@@ -91,6 +114,22 @@ class ChatPolicy
     public function delete(User $user, Chat $chat)
     {
         //
+        $authUser = Auth::user();
+        $userChat = UserChat::where('id_user', 'LIKE', $authUser->id)->where('id_chat', 'LIKE', $chat->id)->get();
+        if(!$authUser->tokenCan('chat:destroy') && $authUser->tokenCan('chat:destroy-own') )
+        {
+            if($userChat->first())
+                return $userChat[0]->id_chat == $chat->id;
+            else
+            {
+                return false;
+            }
+        }
+        else if(!$authUser->tokenCan('chat:destroy-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

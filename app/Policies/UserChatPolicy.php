@@ -32,6 +32,16 @@ class UserChatPolicy
     public function view(User $user, UserChat $userChat)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('userchat:show') && $authUser->tokenCan('userchat:show-own') )
+        {
+            return $authUser->id == $userChat->id_user;
+        }
+        else if(!$authUser->tokenCan('userchat:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -43,6 +53,12 @@ class UserChatPolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('userchat:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,6 +71,16 @@ class UserChatPolicy
     public function update(User $user, UserChat $userChat)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('userchat:update') && $authUser->tokenCan('userchat:update-own') )
+        {
+            return $user->id == $userChat->id_user;
+        }
+        else if(!$authUser->tokenCan('userchat:update-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -67,6 +93,15 @@ class UserChatPolicy
     public function delete(User $user, UserChat $userChat)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('userchat:destroy') && $authUser->tokenCan('userchat:destroy-own') )
+        {
+            return $user->id == $userChat->id_user;
+        }
+        else if(!$authUser->tokenCan('userchat:destroy-own'))
+        {
+            return false;
+        }
     }
 
     /**

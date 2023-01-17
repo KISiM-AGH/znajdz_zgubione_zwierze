@@ -32,6 +32,16 @@ class PostPolicy
     public function view(User $user, Post $post)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('post:show') && $authUser->tokenCan('post:show-own') )
+        {
+            return $user->id == $ppost->id_user;
+        }
+        else if(!$authUser->tokenCan('post:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -43,6 +53,12 @@ class PostPolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('post:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,6 +71,17 @@ class PostPolicy
     public function update(User $user, Post $post)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('post:update') && $authUser->tokenCan('post:update-own') )
+        {
+            return $user->id == $post->id_user;
+        }
+        else if(!$authUser->tokenCan('post:update-own'))
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -67,6 +94,16 @@ class PostPolicy
     public function delete(User $user, Post $post)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('post:destroy') && $authUser->tokenCan('post:destroy-own') )
+        {
+            return $user->id == $post->id_user;
+        }
+        else if(!$authUser->tokenCan('post:destroy-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**

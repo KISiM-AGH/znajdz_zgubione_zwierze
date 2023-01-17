@@ -32,6 +32,16 @@ class MessagePolicy
     public function view(User $user, Message $message)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('message:show') && $authUser->tokenCan('message:show-own') )
+        {
+            return $user->id == $message->id_user;
+        }
+        else if(!$authUser->tokenCan('message:show-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -43,6 +53,12 @@ class MessagePolicy
     public function create(User $user)
     {
         //
+        $authUser = Auth::user();
+        if($authUser->tokenCan('message:store'))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,6 +71,16 @@ class MessagePolicy
     public function update(User $user, Message $message)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('message:update') && $authUser->tokenCan('message:update-own') )
+        {
+            return $user->id == $message->id_user;
+        }
+        else if(!$authUser->tokenCan('message:update-own'))
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -67,6 +93,15 @@ class MessagePolicy
     public function delete(User $user, Message $message)
     {
         //
+        $authUser = Auth::user();
+        if(!$authUser->tokenCan('message:destroy') && $authUser->tokenCan('message:destroy-own') )
+        {
+            return $user->id == $message->id_user;
+        }
+        else if(!$authUser->tokenCan('message:destroy-own'))
+        {
+            return false;
+        }
     }
 
     /**
